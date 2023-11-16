@@ -29,19 +29,19 @@ public class Main {
         WeatherStore weatherStore = new SqliteWeatherStore(args[1]);
         WeatherController weatherController = new WeatherController(weatherProvider, weatherStore);
         loadStaticLocations(args[2]);
-
-        boolean databaseExist = new File(args[1]).exists();
-        Menu(databaseExist, weatherController);
+        Connection connection = weatherController.weatherStore.open();
+        for (String island:mapIslandLocation.keySet()) {
+            weatherController.weatherStore.createTable(island);
+        }
+        Menu(weatherController);
     }
 
-    private static void Menu(boolean databaseExist, WeatherController weatherController) throws SQLException {
+    private static void Menu(WeatherController weatherController) throws SQLException {
         // Mostrar el menú
         int option;
         System.out.println("----- Menú -----");
         System.out.println("1. Activate the APP to collect DATA");
-        if (databaseExist == true){
-            System.out.println("2. Check prediction");
-        }
+        System.out.println("2. Check prediction");
         System.out.println("0. Exit");
         do{
             System.out.print("Enter the option number: ");
@@ -50,7 +50,6 @@ public class Main {
                 case 1:
                     System.out.println("Activating the APP...");
                     Connection connection = weatherController.weatherStore.open();
-                    createIslandsTablesSqlite(weatherController, connection);
                     periodicTask(weatherController);
                     option = 0;
                     break;
@@ -103,15 +102,6 @@ public class Main {
                 mapIslandLocation.put(csvRecord.get(0), new Location(csvRecord.get(0), csvRecord.get(1),csvRecord.get(2)));
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    private static void createIslandsTablesSqlite(WeatherController weatherController, Connection connection) {
-        try {
-            for (String island:mapIslandLocation.keySet()) {
-                weatherController.weatherStore.createTable(connection, island);
-            }
-        } catch (Exception e) {
             e.printStackTrace();
         }
     }

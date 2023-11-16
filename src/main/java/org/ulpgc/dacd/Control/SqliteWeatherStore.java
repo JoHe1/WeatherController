@@ -58,7 +58,8 @@ public class SqliteWeatherStore implements WeatherStore{
         }
         return connection;
     }
-    public void createTable(Connection connection, String island) throws SQLException{
+    public void createTable( String island) throws SQLException{
+        Connection connection = open();
         Statement statement = connection.createStatement();
         String createTableSQL = "CREATE TABLE IF NOT EXISTS " + island + " (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
