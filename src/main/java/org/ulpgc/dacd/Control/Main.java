@@ -3,6 +3,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.ulpgc.dacd.Model.Location;
+import org.ulpgc.dacd.Model.Weather;
 
 import java.io.File;
 import java.io.FileReader;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +40,7 @@ public class Main {
         System.out.println("----- Menú -----");
         System.out.println("1. Activate the APP to collect DATA");
         if (databaseExist == true){
-            System.out.println("2. Show next 5 predictions");
+            System.out.println("2. Check prediction");
         }
         System.out.println("0. Exit");
         do{
@@ -50,9 +52,20 @@ public class Main {
                     Connection connection = weatherController.weatherStore.open();
                     createIslandsTablesSqlite(weatherController, connection);
                     periodicTask(weatherController);
-                    break;
                 case 2:
                     System.out.println("Showing next 5 predictions...");
+                    System.out.println("Enter the island name: ");
+                    String island = scanner.next();
+                    Location location = mapIslandLocation.get(island);
+                    System.out.println("Enter the date (yyyy-mm-dd): ");
+                    String date = scanner.next();
+                    Instant instant = Instant.parse(date + "T12:00:00Z");
+                    Weather weather = weatherController.weatherStore.get(location, instant);
+                    if (weather == null) {
+                        System.out.println("No prediction found");
+                    } else {
+                        System.out.println(weather.toString());
+                    }
                     break;
                 case 0:
                     System.out.println("Exiting...");
@@ -78,13 +91,14 @@ public class Main {
         }
         long initialDelay = nextRun.getTimeInMillis() - System.currentTimeMillis();
         scheduler.scheduleAtFixedRate(new Task(weatherController), initialDelay, 6 * 60 * 60 * 1000, TimeUnit.MILLISECONDS);
+        weatherController.execute();
     }
 
     private static void loadStaticLocations(String file) {
         try (Reader reader = new FileReader(file);
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT)) {
             for (CSVRecord csvRecord : csvParser) {
-                mapIslandLocation.put(csvRecord.get(0), new Location(csvRecord.get(1), csvRecord.get(2),csvRecord.get(0)));
+                mapIslandLocation.put(csvRecord.get(0), new Location(csvRecord.get(0), csvRecord.get(1),csvRecord.get(2)));
             }
         } catch (IOException e) {
             e.printStackTrace();

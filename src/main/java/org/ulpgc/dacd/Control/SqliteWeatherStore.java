@@ -10,7 +10,7 @@ import java.sql.Statement;
 import java.time.Instant;
 import java.util.List;
 
-public class SqliteWeatherStore implements  WeatherStore{
+public class SqliteWeatherStore implements WeatherStore{
     public String file;
 
     public SqliteWeatherStore(String file) {
@@ -19,12 +19,32 @@ public class SqliteWeatherStore implements  WeatherStore{
 
     @Override
     public void save(List<Weather> weathers) throws SQLException {
-
+        Connection connection = open();
+        Statement statement = connection.createStatement();
+        for (Weather weather:weathers) {
+            String sqlCheckPrediction = "SELECT * FROM " + weather.location.island + " WHERE ts = '" + weather.ts + "';";
+            if (statement.executeQuery(sqlCheckPrediction).next()) {
+                String sqlUpdatePrediction = "UPDATE " + weather.location.island + " SET temp = " + weather.temp + ", precipitation = " + weather.precipitation + ", humidity = " + weather.humidity + ", cloud = " + weather.cloud + ", wind_velocity = " + weather.wind_velocity + " WHERE ts = '" + weather.ts + "';";
+                statement.executeUpdate(sqlUpdatePrediction);
+            } else {
+                String sqlSentence = "INSERT INTO " + weather.location.island + " (ts,temp,precipitation,humidity,cloud,wind_velocity) VALUES ('" + weather.ts + "'," + weather.temp + "," + weather.precipitation + "," + weather.humidity + "," + weather.cloud + "," + weather.wind_velocity + ");";
+                statement.executeUpdate(sqlSentence);
+            }
+        }
+        connection.close();
     }
 
     @Override
     public Weather get(Location location, Instant instant) throws SQLException {
-        return null;
+        Connection connection = open();
+        Statement statement = connection.createStatement();
+        String sqlSentence = "SELECT * FROM " + location.island + " WHERE ts = '" + instant.toString() + "';";
+        Weather weather = null;
+        if (statement.executeQuery(sqlSentence).next()) {
+            weather = new Weather(statement.executeQuery(sqlSentence).getDouble("temp"), statement.executeQuery(sqlSentence).getDouble("precipitation"), statement.executeQuery(sqlSentence).getDouble("humidity"), statement.executeQuery(sqlSentence).getDouble("cloud"), statement.executeQuery(sqlSentence).getDouble("wind_velocity"), instant, location);
+        }
+        connection.close();
+        return weather;
     }
 
     @Override
@@ -38,7 +58,6 @@ public class SqliteWeatherStore implements  WeatherStore{
         }
         return connection;
     }
-
     public void createTable(Connection connection, String island) throws SQLException{
         Statement statement = connection.createStatement();
         String createTableSQL = "CREATE TABLE IF NOT EXISTS " + island + " (" +

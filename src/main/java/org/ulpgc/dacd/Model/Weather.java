@@ -20,4 +20,17 @@ public class Weather {
         this.ts = ts;
         this.location = location;
     }
+
+    @Override
+    public String toString() {
+        return "Weather{" +
+                "temperature = " + temp +
+                ", probability of precipitation = " + precipitation +
+                ", humidity = " + humidity +
+                ", cloud = " + cloud +
+                ", wind_velocity = " + wind_velocity +
+                ", instant = " + ts +
+                ", island = " + location.island +
+                '}';
+    }
 }

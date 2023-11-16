@@ -12,8 +12,5 @@ public interface WeatherStore extends AutoCloseable {
     void save(List<Weather> weathers) throws SQLException;
     Weather get(Location location, Instant instant) throws SQLException;
     Connection open() throws SQLException;
-
-    void close() throws Exception;
-
     void createTable(Connection connection, String location) throws SQLException;
 }
