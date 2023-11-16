@@ -52,6 +52,8 @@ public class Main {
                     Connection connection = weatherController.weatherStore.open();
                     createIslandsTablesSqlite(weatherController, connection);
                     periodicTask(weatherController);
+                    option = 0;
+                    break;
                 case 2:
                     System.out.println("Showing next 5 predictions...");
                     System.out.println("Enter the island name: ");
@@ -91,6 +93,7 @@ public class Main {
         }
         long initialDelay = nextRun.getTimeInMillis() - System.currentTimeMillis();
         scheduler.scheduleAtFixedRate(new Task(weatherController), initialDelay, 6 * 60 * 60 * 1000, TimeUnit.MILLISECONDS);
+
     }
 
     private static void loadStaticLocations(String file) {
