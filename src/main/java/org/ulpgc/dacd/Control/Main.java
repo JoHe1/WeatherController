@@ -5,7 +5,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.ulpgc.dacd.Model.Location;
 import org.ulpgc.dacd.Model.Weather;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
