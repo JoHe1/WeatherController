@@ -53,7 +53,7 @@ public class Main {
                     option = 0;
                     break;
                 case 2:
-                    System.out.println("Showing next 5 predictions...");
+                    System.out.println("Show you a prediction...");
                     System.out.println("Enter the island name: ");
                     String island = scanner.next();
                     Location location = mapIslandLocation.get(island);
